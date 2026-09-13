@@ -27,15 +27,15 @@ class WineDbgWrapper:
         assert self.winedbg_path is not None
         self.process = pexpect.spawn(self.winedbg_path, args=args, encoding='utf-8')
         self.process.expect(r'Wine-dbg>')
-        return self.process.before
+        return str(self.process.before or "")
 
     def send_command(self, command):
         if not self.process:
             return "winedbg not running."
-        
+
         self.process.sendline(command)
         self.process.expect(r'Wine-dbg>')
-        return self.process.before
+        return str(self.process.before or "")
 
     def run(self, executable):
         return self.start([executable])

@@ -21,6 +21,8 @@ This project provides a server that wraps the Wine Debugger (`winedbg`) and expo
 
 ## Usage
 
+The server speaks the Model Context Protocol over **stdio** by default, so it works directly with any MCP client.
+
 1.  Start the server:
 
     ```bash
@@ -40,7 +42,11 @@ export WINEDBG_PATH="/path/to/app/Contents/Wineskin.app/Contents/Resources/wined
 mcp-winedbg
 ```
 
-2.  Run the test client to see the server in action:
+### Legacy HTTP server
+
+A previous version exposed the same commands over a plain HTTP API on port 8080. It is still available as `mcp-winedbg-http` (or `python -m mcp_winedbg.mcp_server`) for backwards compatibility, and `tests/test_client.py` uses it.
+
+2.  Run the test client to see the HTTP server in action:
 
     ```bash
     python tests/test_client.py
@@ -67,9 +73,9 @@ This project includes a simple C application that can be used for testing the se
 
     The test client will automatically use the `test_app.exe` to test the server's functionality.
 
-## MCP Server Configuration
+## MCP Client Configuration
 
-If you are using a client that supports launching MCP servers, you can configure it with the following JSON. This tells the client how to start the `winedbg` server.
+If you are using an MCP client that supports launching stdio servers, configure it with the following JSON. This tells the client how to start the `winedbg` server.
 
 ```json
 {

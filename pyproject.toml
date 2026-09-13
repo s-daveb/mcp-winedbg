@@ -25,7 +25,8 @@ dependencies = [
 ]
 
 [project.scripts]
-mcp-winedbg = "mcp_winedbg.mcp_server:main"
+mcp-winedbg = "mcp_winedbg.mcp_stdio:main"
+mcp-winedbg-http = "mcp_winedbg.mcp_server:main"
 
 [tool.setuptools]
 packages = ["mcp_winedbg"]
