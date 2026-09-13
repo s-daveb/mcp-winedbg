@@ -75,19 +75,20 @@ This project includes a simple C application that can be used for testing the se
 
 ## MCP Client Configuration
 
-If you are using an MCP client that supports launching stdio servers, configure it with the following JSON. This tells the client how to start the `winedbg` server.
+If you are using an MCP client that supports launching stdio servers, configure it with the following JSON. Use the **full absolute path** to the `mcp-winedbg` executable (clients launched from a GUI may not have your shell's `PATH`), and set `WINEDBG_PATH` if `winedbg` is not on the client's `PATH`.
 
 ```json
 {
   "mcpServers": {
     "winedbg": {
-      "command": "/ABSOLUTE/PATH/TO/YOUR/VENV/bin/mcp-winedbg"
+      "command": "/Users/you/.venv/bin/mcp-winedbg",
+      "env": {
+        "WINEDBG_PATH": "/path/to/app/Contents/Wineskin.app/Contents/Resources/winedbg"
+      }
     }
   }
 }
 ```
-
-Replace `/ABSOLUTE/PATH/TO/YOUR/VENV/bin/mcp-winedbg` with the actual path to the installed `mcp-winedbg` executable inside your virtual environment.
 
 ## Available Tools
 

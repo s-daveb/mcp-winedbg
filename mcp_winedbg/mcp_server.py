@@ -5,7 +5,21 @@ from .winedbg_wrapper import WineDbgWrapper
 import uvicorn
 import os
 
-winedbg = WineDbgWrapper()
+
+class _LazyWineDbg:
+    def __init__(self):
+        self._wrapper = None
+
+    def _get(self):
+        if self._wrapper is None:
+            self._wrapper = WineDbgWrapper()
+        return self._wrapper
+
+    def __getattr__(self, name):
+        return getattr(self._get(), name)
+
+
+winedbg = _LazyWineDbg()
 
 async def list_tools(request):
     tools = [

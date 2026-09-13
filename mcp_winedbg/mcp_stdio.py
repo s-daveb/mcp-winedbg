@@ -3,7 +3,21 @@ import os
 
 from .winedbg_wrapper import WineDbgWrapper
 
-winedbg = WineDbgWrapper()
+
+class _LazyWineDbg:
+    def __init__(self):
+        self._wrapper = None
+
+    def _get(self):
+        if self._wrapper is None:
+            self._wrapper = WineDbgWrapper()
+        return self._wrapper
+
+    def __getattr__(self, name):
+        return getattr(self._get(), name)
+
+
+winedbg = _LazyWineDbg()
 
 mcp = FastMCP(
     "winedbg",
