@@ -33,6 +33,13 @@ This project provides a server that wraps the Wine Debugger (`winedbg`) and expo
     python -m mcp_winedbg
     ```
 
+`winedbg` is located by searching your `PATH`. If it lives somewhere custom (for example inside a Wine wrapper bundle on macOS), point the server at it with the `WINEDBG_PATH` environment variable:
+
+```bash
+export WINEDBG_PATH="/path/to/app/Contents/Wineskin.app/Contents/Resources/winedbg"
+mcp-winedbg
+```
+
 2.  Run the test client to see the server in action:
 
     ```bash

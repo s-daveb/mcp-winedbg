@@ -1,17 +1,31 @@
+import os
 import pexpect
 import shutil
 
 class WineDbgWrapper:
     def __init__(self):
         self.process = None
-        if not self.is_winedbg_installed():
-            raise RuntimeError("winedbg is not installed. Please install it to use this wrapper.")
+        self.winedbg_path = self._find_winedbg()
+        if not self.winedbg_path:
+            raise RuntimeError(
+                "winedbg not found. Install it and add it to PATH, "
+                "or set the WINEDBG_PATH environment variable to its full path."
+            )
+
+    def _find_winedbg(self):
+        path = os.environ.get("WINEDBG_PATH")
+        if path:
+            if os.path.isfile(path) and os.access(path, os.X_OK):
+                return path
+            return None
+        return shutil.which("winedbg")
 
     def is_winedbg_installed(self):
-        return shutil.which("winedbg") is not None
+        return self._find_winedbg() is not None
 
-    def start(self, command):
-        self.process = pexpect.spawn(command, encoding='utf-8')
+    def start(self, args):
+        assert self.winedbg_path is not None
+        self.process = pexpect.spawn(self.winedbg_path, args=args, encoding='utf-8')
         self.process.expect(r'Wine-dbg>')
         return self.process.before
 
@@ -24,10 +38,10 @@ class WineDbgWrapper:
         return self.process.before
 
     def run(self, executable):
-        return self.start(f"winedbg {executable}")
+        return self.start([executable])
 
     def attach(self, pid):
-        return self.start(f"winedbg --pid {pid}")
+        return self.start(["--pid", str(pid)])
 
     def quit(self):
         if self.process:
