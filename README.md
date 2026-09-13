@@ -5,12 +5,18 @@ This project provides a server that wraps the Wine Debugger (`winedbg`) and expo
 ## Installation
 
 1.  Install Wine and `winedbg`.
-2.  Create a Python virtual environment and install the required dependencies:
+2.  Install the package directly from GitHub (optionally inside a virtual environment):
 
     ```bash
     python -m venv .venv
     source .venv/bin/activate
-    pip install -r requirements.txt
+    pip install git+https://github.com/s-daveb/mcp-winedbg.git
+    ```
+
+    Or, for local development:
+
+    ```bash
+    pip install -e .
     ```
 
 ## Usage
@@ -18,7 +24,13 @@ This project provides a server that wraps the Wine Debugger (`winedbg`) and expo
 1.  Start the server:
 
     ```bash
-    python -m src.mcp_server
+    mcp-winedbg
+    ```
+
+    Or, if installed from source:
+
+    ```bash
+    python -m mcp_winedbg
     ```
 
 2.  Run the test client to see the server in action:
@@ -52,20 +64,17 @@ This project includes a simple C application that can be used for testing the se
 
 If you are using a client that supports launching MCP servers, you can configure it with the following JSON. This tells the client how to start the `winedbg` server.
 
-**Note:** Make sure to replace `/ABSOLUTE/PATH/TO/PARENT/FOLDER/mcp-winedbg` with the actual absolute path to this project directory on your system.
-
 ```json
 {
   "mcpServers": {
     "winedbg": {
-      "command": "/ABSOLUTE/PATH/TO/PARENT/FOLDER/mcp-winedbg/.venv/bin/python",
-      "args": [
-        "/ABSOLUTE/PATH/TO/PARENT/FOLDER/mcp-winedbg/src/mcp_server.py"
-      ]
+      "command": "/ABSOLUTE/PATH/TO/YOUR/VENV/bin/mcp-winedbg"
     }
   }
 }
 ```
+
+Replace `/ABSOLUTE/PATH/TO/YOUR/VENV/bin/mcp-winedbg` with the actual path to the installed `mcp-winedbg` executable inside your virtual environment.
 
 ## Available Tools
 

@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcp-winedbg"
+version = "0.1.0"
+description = "MCP server that wraps the Wine Debugger (winedbg) and exposes its functionality through a simple API."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "s-daveb" }]
+keywords = ["mcp", "winedbg", "wine", "debugger", "server"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX",
+]
+dependencies = [
+    "fastmcp",
+    "starlette",
+    "uvicorn",
+    "pexpect",
+    "httpx",
+]
+
+[project.scripts]
+mcp-winedbg = "mcp_winedbg.mcp_server:main"
+
+[tool.setuptools]
+packages = ["mcp_winedbg"]
