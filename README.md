@@ -95,7 +95,7 @@ If you are using an MCP client that supports launching stdio servers, configure 
 The server exposes the following tools:
 
 *   `run`: Run an executable in `winedbg`.
-*   `attach`: Attach to a process.
+*   `attach`: Attach to a running Wine process by Windows PID (e.g. `2412`), Unix PID, or executable name (e.g. `Bonfire.exe`). The Windows PID is resolved automatically via `info proc`. Attaching requires `WINEMSYNC=1` when the target prefix's wineserver runs in msync mode (the wrapper sets it unless already defined).
 *   `quit`: Quit `winedbg`.
 *   `detach`: Detach from the process.
 *   `kill`: Kill the process.

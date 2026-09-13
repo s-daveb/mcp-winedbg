@@ -24,7 +24,7 @@ winedbg = _LazyWineDbg()
 async def list_tools(request):
     tools = [
         {"name": "run", "description": "Run an executable in winedbg"},
-        {"name": "attach", "description": "Attach to a process"},
+        {"name": "attach", "description": "Attach to a process by Windows PID, Unix PID, or executable name"},
         {"name": "quit", "description": "Quit winedbg"},
         {"name": "detach", "description": "Detach from the process"},
         {"name": "kill", "description": "Kill the process"},
@@ -61,7 +61,7 @@ async def run(request):
 
 async def attach(request):
     data = await request.json()
-    result = winedbg.attach(data["pid"])
+    result = winedbg.attach(data.get("target", data.get("pid", data.get("executable"))))
     return JSONResponse({"result": result})
 
 async def quit(request):

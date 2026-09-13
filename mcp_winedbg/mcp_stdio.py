@@ -32,9 +32,9 @@ def run(executable: str) -> str:
 
 
 @mcp.tool()
-def attach(pid: int) -> str:
-    """Attach to a process by PID."""
-    return winedbg.attach(pid)
+def attach(target: str | int) -> str:
+    """Attach to a running Wine process by Windows PID (e.g. 2412), Unix PID, or executable name (e.g. \"Bonfire.exe\")."""
+    return winedbg.attach(target)
 
 
 @mcp.tool()

@@ -1,10 +1,13 @@
 import os
 import pexpect
+import re
 import shutil
+import subprocess
 
 class WineDbgWrapper:
-    def __init__(self):
+    def __init__(self, msync=True):
         self.process = None
+        self.msync = msync
         self.winedbg_path = self._find_winedbg()
         if not self.winedbg_path:
             raise RuntimeError(
@@ -23,25 +26,90 @@ class WineDbgWrapper:
     def is_winedbg_installed(self):
         return self._find_winedbg() is not None
 
-    def start(self, args):
+    def _spawn(self, args, timeout=30):
         assert self.winedbg_path is not None
-        self.process = pexpect.spawn(self.winedbg_path, args=args, encoding='utf-8')
+        if self.msync and os.environ.get("WINEMSYNC") is None:
+            os.environ["WINEMSYNC"] = "1"
+        return pexpect.spawn(self.winedbg_path, args=args, encoding='utf-8', timeout=timeout)
+
+    def start(self, args):
+        self.process = self._spawn(args)
         self.process.expect(r'Wine-dbg>')
         return str(self.process.before or "")
 
-    def send_command(self, command):
+    def send_command(self, command, timeout=30):
         if not self.process:
             return "winedbg not running."
 
         self.process.sendline(command)
-        self.process.expect(r'Wine-dbg>')
+        self.process.expect(r'Wine-dbg>', timeout=timeout)
         return str(self.process.before or "")
 
     def run(self, executable):
         return self.start([executable])
 
-    def attach(self, pid):
-        return self.start(["--pid", str(pid)])
+    def attach(self, target):
+        resolved = self._resolve_target(target)
+        if resolved is None:
+            procs = self._list_processes()
+            if not procs:
+                return "No running Wine processes found to attach to."
+            avail = ", ".join(f"{pid} ({name})" for pid, name in sorted(procs.items()))
+            return f"Could not resolve target {target!r} to a running Wine process. Use: attach <windows-pid> or attach <executable-name>. Running: {avail}"
+        return self.start([str(resolved)])
+
+    def _run_command(self, command, timeout=60):
+        p = self._spawn(["--command", command], timeout=timeout)
+        p.expect(pexpect.EOF, timeout=timeout)
+        return str(p.before or "")
+
+    def _list_processes(self):
+        out = self._run_command("info proc")
+        clean = re.sub(r"\x1b\[[0-9;?]*[a-zA-Z]|\x1b\][^\x07]*\x07|\r", "", out)
+        procs = {}
+        for m in re.finditer(r"([0-9a-f]+)\s+\d+\s+[^'\n]*'([^']+\.exe)'", clean):
+            procs[int(m.group(1), 16)] = m.group(2)
+        return procs
+
+    def _unix_processes(self):
+        out = subprocess.check_output(["ps", "-axo", "pid=,command="], text=True, errors="replace")
+        procs = {}
+        for line in out.splitlines():
+            parts = line.split()
+            if len(parts) < 2:
+                continue
+            cmd = " ".join(parts[1:])
+            if ".exe" not in cmd.lower():
+                continue
+            name = re.search(r"([^\\/]+\.exe)\s*$", cmd)
+            if not name:
+                continue
+            procs[int(parts[0])] = name.group(1)
+        return procs
+
+    def _resolve_target(self, target):
+        procs = self._list_processes()
+        if not procs:
+            return None
+        if isinstance(target, bool):
+            return None
+        if isinstance(target, int):
+            if target in procs:
+                return target
+            unix = self._unix_processes()
+            name = unix.get(target)
+            if name:
+                matched = [pid for pid, n in procs.items() if n.lower() == name.lower()]
+                if len(matched) == 1:
+                    return matched[0]
+            return None
+        name = str(target).strip().lower()
+        if not name.endswith(".exe"):
+            name += ".exe"
+        matched = [pid for pid, n in procs.items() if n.strip().lower() == name]
+        if len(matched) == 1:
+            return matched[0]
+        return None
 
     def quit(self):
         if self.process:
